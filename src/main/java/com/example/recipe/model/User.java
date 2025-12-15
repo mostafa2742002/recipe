@@ -21,6 +21,16 @@ public class User {
 
     private String password;
 
+    private String bio;
+
+    private String profileImage;
+
+    @DBRef // recipes authored by the user
+    private Set<Recipe> recipesAuthored = new HashSet<>();
+
+    @DBRef // recipes saved/favorited by the user
+    private Set<Recipe> recipesSaved = new HashSet<>();
+
     private Boolean enabled = true;
 
     @DBRef // this mean that roles are stored in a separate collection

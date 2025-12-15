@@ -5,7 +5,7 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
-import com.example.recipe.model.AuthRequest;
+import com.example.recipe.dto.AuthRequest;
 import com.example.recipe.service.AuthService;
 
 import lombok.AllArgsConstructor;

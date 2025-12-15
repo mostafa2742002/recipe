@@ -10,7 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.recipe.config.JwtService;
-import com.example.recipe.model.AuthRequest;
+import com.example.recipe.dto.AuthRequest;
 import com.example.recipe.model.Role;
 import com.example.recipe.model.User;
 import com.example.recipe.repository.RoleRepository;
