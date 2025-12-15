@@ -11,8 +11,9 @@ import org.springframework.data.mongodb.core.index.TextIndexed;
 import org.springframework.data.mongodb.core.mapping.DBRef;
 import org.springframework.data.mongodb.core.mapping.Document;
 
-import lombok.Data;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 
+import lombok.Data;
 
 @Document(collection = "recipes")
 @Data
@@ -27,10 +28,10 @@ public class Recipe {
     private String image;
 
     @Indexed
-    private String cuisine; 
+    private String cuisine;
 
     @Indexed
-    private Long prepTime; 
+    private Long prepTime;
 
     private java.util.List<String> ingredientNames = new java.util.ArrayList<>();
 
@@ -42,9 +43,10 @@ public class Recipe {
     private java.util.List<String> dietaryPreferences = new java.util.ArrayList<>();
 
     @DBRef
+    @JsonIgnoreProperties({ "password", "recipesAuthored", "recipesSaved", "roles" })
     private User author;
 
-    @Indexed 
+    @Indexed
     private Integer favoritesCount = 0;
 
     @CreatedDate

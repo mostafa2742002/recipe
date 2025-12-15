@@ -68,12 +68,11 @@
                             "script": {
                                 "type": "text/javascript",
                                 "exec": [
-                                    "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
-                                    "// Response is plain text like: 'User logged in successfully. Token: <token>'",
-                                    "const text = pm.response.text();",
-                                    "const m = text.match(/Token:\\s*(.+)$/);",
-                                    "if (m && m[1]) { pm.environment.set('token', m[1].trim()); }",
-                                    "pm.test('Token extracted', function () { pm.expect(pm.environment.get('token')).to.be.a('string'); });"
+                                    "pm.test('Status is 200', () => pm.response.to.have.status(200));",
+                                    "const json = pm.response.json();",
+                                    "pm.test('success flag true', () => pm.expect(json.success).to.be.true);",
+                                    "pm.test('token present', () => pm.expect(json.data.token).to.be.a('string').and.not.empty);",
+                                    "pm.environment.set('token', json.data.token);"
                                 ]
                             }
                         }
@@ -128,7 +127,9 @@
                                 "exec": [
                                     "pm.test('Created', () => pm.response.to.have.status(201));",
                                     "const json = pm.response.json();",
-                                    "pm.environment.set('recipeId', json.id || json._id || '');",
+                                    "pm.test('success flag true', () => pm.expect(json.success).to.be.true);",
+                                    "pm.test('data object exists', () => pm.expect(json.data).to.be.an('object'));",
+                                    "pm.environment.set('recipeId', json.data.id || json.data._id || '');",
                                     "pm.test('Captured recipeId', () => pm.expect(pm.environment.get('recipeId')).to.not.be.empty);"
                                 ]
                             }
