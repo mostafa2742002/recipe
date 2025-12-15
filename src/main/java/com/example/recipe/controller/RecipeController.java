@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import com.example.recipe.model.Recipe;
 import com.example.recipe.model.User;
 import com.example.recipe.repository.UserRepository;
@@ -48,13 +50,9 @@ public class RecipeController {
      */
     @PostMapping
     public ResponseEntity<?> createRecipe(@RequestBody Recipe recipe) {
-        try {
-            String userId = getCurrentUserId();
-            Recipe createdRecipe = recipeService.createRecipe(recipe, userId);
-            return ResponseEntity.status(HttpStatus.CREATED).body(createdRecipe);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error creating recipe: " + e.getMessage());
-        }
+        String userId = getCurrentUserId();
+        Recipe createdRecipe = recipeService.createRecipe(recipe, userId);
+        return ResponseEntity.status(HttpStatus.CREATED).body(createdRecipe);
     }
 
     /**
@@ -84,13 +82,9 @@ public class RecipeController {
      */
     @GetMapping("/user/my-recipes")
     public ResponseEntity<?> getMyRecipes() {
-        try {
-            String userId = getCurrentUserId();
-            List<Recipe> recipes = recipeService.getRecipesByAuthor(userId);
-            return ResponseEntity.ok(recipes);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error fetching recipes: " + e.getMessage());
-        }
+        String userId = getCurrentUserId();
+        List<Recipe> recipes = recipeService.getRecipesByAuthor(userId);
+        return ResponseEntity.ok(recipes);
     }
 
     /**
@@ -109,13 +103,9 @@ public class RecipeController {
      */
     @PutMapping("/{id}")
     public ResponseEntity<?> updateRecipe(@PathVariable String id, @RequestBody Recipe updates) {
-        try {
-            String userId = getCurrentUserId();
-            Recipe updatedRecipe = recipeService.updateRecipe(id, updates, userId);
-            return ResponseEntity.ok(updatedRecipe);
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: " + e.getMessage());
-        }
+        String userId = getCurrentUserId();
+        Recipe updatedRecipe = recipeService.updateRecipe(id, updates, userId);
+        return ResponseEntity.ok(updatedRecipe);
     }
 
     /**
@@ -124,13 +114,9 @@ public class RecipeController {
      */
     @DeleteMapping("/{id}")
     public ResponseEntity<?> deleteRecipe(@PathVariable String id) {
-        try {
-            String userId = getCurrentUserId();
-            recipeService.deleteRecipe(id, userId);
-            return ResponseEntity.ok("Recipe deleted successfully");
-        } catch (RuntimeException e) {
-            return ResponseEntity.status(HttpStatus.FORBIDDEN).body("Error: " + e.getMessage());
-        }
+        String userId = getCurrentUserId();
+        recipeService.deleteRecipe(id, userId);
+        return ResponseEntity.ok("Recipe deleted successfully");
     }
 
     /**
@@ -139,13 +125,9 @@ public class RecipeController {
      */
     @PostMapping("/{id}/save")
     public ResponseEntity<?> saveRecipe(@PathVariable String id) {
-        try {
-            String userId = getCurrentUserId();
-            recipeService.addRecipeToUserSaved(id, userId);
-            return ResponseEntity.ok("Recipe saved successfully");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error saving recipe: " + e.getMessage());
-        }
+        String userId = getCurrentUserId();
+        recipeService.addRecipeToUserSaved(id, userId);
+        return ResponseEntity.ok("Recipe saved successfully");
     }
 
     /**
@@ -154,13 +136,9 @@ public class RecipeController {
      */
     @DeleteMapping("/{id}/unsave")
     public ResponseEntity<?> unsaveRecipe(@PathVariable String id) {
-        try {
-            String userId = getCurrentUserId();
-            recipeService.removeRecipeFromUserSaved(id, userId);
-            return ResponseEntity.ok("Recipe removed from saved");
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error removing recipe: " + e.getMessage());
-        }
+        String userId = getCurrentUserId();
+        recipeService.removeRecipeFromUserSaved(id, userId);
+        return ResponseEntity.ok("Recipe removed from saved");
     }
 
     /**
@@ -169,13 +147,9 @@ public class RecipeController {
      */
     @GetMapping("/user/saved")
     public ResponseEntity<?> getMySavedRecipes() {
-        try {
-            String userId = getCurrentUserId();
-            List<Recipe> recipes = recipeService.getUserSavedRecipes(userId);
-            return ResponseEntity.ok(recipes);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Error fetching saved recipes: " + e.getMessage());
-        }
+        String userId = getCurrentUserId();
+        List<Recipe> recipes = recipeService.getUserSavedRecipes(userId);
+        return ResponseEntity.ok(recipes);
     }
 
     /**
@@ -228,12 +202,8 @@ public class RecipeController {
      * @return SearchResponse with paginated results and metadata
      */
     @GetMapping("/search")
-    public ResponseEntity<?> search(SearchRequest searchRequest) {
-        try {
-            SearchResponse results = recipeService.advancedSearch(searchRequest);
-            return ResponseEntity.ok(results);
-        } catch (Exception e) {
-            return ResponseEntity.badRequest().body("Search error: " + e.getMessage());
-        }
+    public ResponseEntity<?> search(@Valid SearchRequest searchRequest) {
+        SearchResponse results = recipeService.advancedSearch(searchRequest);
+        return ResponseEntity.ok(results);
     }
 }

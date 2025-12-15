@@ -15,6 +15,8 @@ import org.springframework.stereotype.Service;
 import com.example.recipe.dto.RecipeSearchResult;
 import com.example.recipe.dto.SearchRequest;
 import com.example.recipe.dto.SearchResponse;
+import com.example.recipe.exception.ForbiddenActionException;
+import com.example.recipe.exception.ResourceNotFoundException;
 import com.example.recipe.model.Recipe;
 import com.example.recipe.model.User;
 import com.example.recipe.repository.RecipeRepository;
@@ -35,7 +37,7 @@ public class RecipeService {
      */
     public Recipe createRecipe(Recipe recipe, String userId) {
         User author = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         recipe.setAuthor(author);
         Recipe savedRecipe = recipeRepository.save(recipe);
@@ -164,10 +166,10 @@ public class RecipeService {
 
     public Recipe updateRecipe(String recipeId, Recipe updates, String userId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new RuntimeException("Recipe not found with id: " + recipeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe not found with id: " + recipeId));
 
         if (!recipe.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("Only the author can update this recipe");
+            throw new ForbiddenActionException("Only the author can update this recipe");
         }
 
         if (updates.getTitle() != null)
@@ -192,10 +194,10 @@ public class RecipeService {
 
     public void deleteRecipe(String recipeId, String userId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new RuntimeException("Recipe not found with id: " + recipeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe not found with id: " + recipeId));
 
         if (!recipe.getAuthor().getId().equals(userId)) {
-            throw new RuntimeException("Only the author can delete this recipe");
+            throw new ForbiddenActionException("Only the author can delete this recipe");
         }
 
         User author = recipe.getAuthor();
@@ -207,10 +209,10 @@ public class RecipeService {
 
     public void addRecipeToUserSaved(String recipeId, String userId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new RuntimeException("Recipe not found with id: " + recipeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe not found with id: " + recipeId));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         if (!user.getRecipesSaved().contains(recipe)) {
             user.getRecipesSaved().add(recipe);
@@ -223,10 +225,10 @@ public class RecipeService {
 
     public void removeRecipeFromUserSaved(String recipeId, String userId) {
         Recipe recipe = recipeRepository.findById(recipeId)
-                .orElseThrow(() -> new RuntimeException("Recipe not found with id: " + recipeId));
+                .orElseThrow(() -> new ResourceNotFoundException("Recipe not found with id: " + recipeId));
 
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         if (user.getRecipesSaved().remove(recipe)) {
             recipe.setFavoritesCount((recipe.getFavoritesCount() != null ? recipe.getFavoritesCount() : 0) - 1);
@@ -238,7 +240,7 @@ public class RecipeService {
 
     public List<Recipe> getUserSavedRecipes(String userId) {
         User user = userRepository.findById(userId)
-                .orElseThrow(() -> new RuntimeException("User not found with id: " + userId));
+                .orElseThrow(() -> new ResourceNotFoundException("User not found with id: " + userId));
 
         return user.getRecipesSaved().stream().toList();
     }

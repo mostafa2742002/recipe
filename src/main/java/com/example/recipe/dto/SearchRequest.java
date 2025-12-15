@@ -1,5 +1,7 @@
 package com.example.recipe.dto;
 
+import jakarta.validation.constraints.Max;
+import jakarta.validation.constraints.Min;
 import lombok.Data;
 import lombok.NoArgsConstructor;
 
@@ -39,8 +41,11 @@ public class SearchRequest {
     private String sortBy = "relevance";
 
     // Page number for pagination
+    @Min(value = 0, message = "Page must be 0 or greater")
     private Integer page = 0;
 
     // Items per page
+    @Min(value = 1, message = "Limit must be at least 1")
+    @Max(value = 100, message = "Limit cannot exceed 100")
     private Integer limit = 10;
 }

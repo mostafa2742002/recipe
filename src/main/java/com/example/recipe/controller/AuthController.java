@@ -5,6 +5,8 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RestController;
 
+import jakarta.validation.Valid;
+
 import com.example.recipe.dto.AuthRequest;
 import com.example.recipe.service.AuthService;
 
@@ -17,12 +19,12 @@ public class AuthController {
     private final AuthService authService;
 
     @PostMapping("/api/auth/register")
-    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> register(@Valid @RequestBody AuthRequest request) {
         return authService.register(request);
     }
 
     @PostMapping("/api/auth/login")
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<?> login(@Valid @RequestBody AuthRequest request) {
         return authService.login(request);
     }
 
