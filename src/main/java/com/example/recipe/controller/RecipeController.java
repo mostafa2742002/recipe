@@ -18,6 +18,8 @@ import org.springframework.web.bind.annotation.RestController;
 import com.example.recipe.model.Recipe;
 import com.example.recipe.model.User;
 import com.example.recipe.repository.UserRepository;
+import com.example.recipe.dto.SearchRequest;
+import com.example.recipe.dto.SearchResponse;
 import com.example.recipe.service.RecipeService;
 
 import lombok.AllArgsConstructor;
@@ -204,5 +206,34 @@ public class RecipeController {
     public ResponseEntity<?> searchByDietaryTag(@RequestParam String tag) {
         List<Recipe> recipes = recipeService.getRecipesByDietaryTag(tag);
         return ResponseEntity.ok(recipes);
+    }
+
+    /**
+     * UNIFIED SEARCH ENDPOINT - Combines all search and filtering in one place
+     * 
+     * GET
+     * /api/recipes/search?ingredient=chicken&diet=Keto&cuisine=Egyptian&maxPrepTime=30&sortBy=preptime&page=0&limit=10
+     * 
+     * All parameters are optional. Examples:
+     * - Get all recipes: GET /api/recipes/search
+     * - Search by ingredient: GET /api/recipes/search?ingredient=chicken
+     * - Filter by diet: GET /api/recipes/search?diet=Vegan
+     * - Multiple filters: GET
+     * /api/recipes/search?ingredient=chicken&diet=Keto&cuisine=Egyptian
+     * - Prep time filter: GET /api/recipes/search?maxPrepTime=30
+     * - Sort options: sortBy=preptime, favorites, relevance, createdAt
+     * - Pagination: page=0&limit=10 (default: page 0, 10 items)
+     * 
+     * @param searchRequest DTO containing all optional filters
+     * @return SearchResponse with paginated results and metadata
+     */
+    @GetMapping("/search")
+    public ResponseEntity<?> search(SearchRequest searchRequest) {
+        try {
+            SearchResponse results = recipeService.advancedSearch(searchRequest);
+            return ResponseEntity.ok(results);
+        } catch (Exception e) {
+            return ResponseEntity.badRequest().body("Search error: " + e.getMessage());
+        }
     }
 }

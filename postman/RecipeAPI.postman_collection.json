@@ -1,0 +1,421 @@
+{
+    "info": {
+        "_postman_id": "8e3d9a3a-4f8d-4e4e-9b1f-0f1a8f8b0abc",
+        "name": "Recipe API",
+        "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+    },
+    "item": [
+        {
+            "name": "Auth",
+            "item": [
+                {
+                    "name": "Register",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/register",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "register"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"username\": \"{{username}}\",\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Login (sets {{token}})",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/auth/login",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "auth",
+                                "login"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"email\": \"{{email}}\",\n  \"password\": \"{{password}}\"\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Status is 200', function () { pm.response.to.have.status(200); });",
+                                    "// Response is plain text like: 'User logged in successfully. Token: <token>'",
+                                    "const text = pm.response.text();",
+                                    "const m = text.match(/Token:\\s*(.+)$/);",
+                                    "if (m && m[1]) { pm.environment.set('token', m[1].trim()); }",
+                                    "pm.test('Token extracted', function () { pm.expect(pm.environment.get('token')).to.be.a('string'); });"
+                                ]
+                            }
+                        }
+                    ],
+                    "response": []
+                }
+            ]
+        },
+        {
+            "name": "Recipes",
+            "auth": {
+                "type": "bearer",
+                "bearer": [
+                    {
+                        "key": "token",
+                        "value": "{{token}}",
+                        "type": "string"
+                    }
+                ]
+            },
+            "item": [
+                {
+                    "name": "Create Recipe (sample)",
+                    "request": {
+                        "method": "POST",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Chicken Biryani\",\n  \"image\": \"https://example.com/biryani.jpg\",\n  \"cuisine\": \"Indian\",\n  \"prepTime\": 45,\n  \"ingredientNames\": [\"chicken\", \"rice\", \"onion\"],\n  \"ingredients\": {\n    \"chicken\": 1,\n    \"rice\": 500,\n    \"onion\": 2\n  },\n  \"steps\": \"Marinate chicken, cook rice, layer and steam.\",\n  \"dietaryPreferences\": [\"Keto\"]\n}"
+                        }
+                    },
+                    "event": [
+                        {
+                            "listen": "test",
+                            "script": {
+                                "type": "text/javascript",
+                                "exec": [
+                                    "pm.test('Created', () => pm.response.to.have.status(201));",
+                                    "const json = pm.response.json();",
+                                    "pm.environment.set('recipeId', json.id || json._id || '');",
+                                    "pm.test('Captured recipeId', () => pm.expect(pm.environment.get('recipeId')).to.not.be.empty);"
+                                ]
+                            }
+                        }
+                    ]
+                },
+                {
+                    "name": "Get All Recipes",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Get Recipe By ID",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/{{recipeId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "{{recipeId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Update Recipe (title)",
+                    "request": {
+                        "method": "PUT",
+                        "header": [
+                            {
+                                "key": "Content-Type",
+                                "value": "application/json"
+                            }
+                        ],
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/{{recipeId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "{{recipeId}}"
+                            ]
+                        },
+                        "body": {
+                            "mode": "raw",
+                            "raw": "{\n  \"title\": \"Updated Biryani\"\n}"
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Save Recipe",
+                    "request": {
+                        "method": "POST",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/{{recipeId}}/save",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "{{recipeId}}",
+                                "save"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Unsave Recipe",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/{{recipeId}}/unsave",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "{{recipeId}}",
+                                "unsave"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "My Recipes (authored)",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/user/my-recipes",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "user",
+                                "my-recipes"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "My Saved Recipes",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/user/saved",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "user",
+                                "saved"
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Search: Unified",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/search?ingredient={{ingredient}}&dietaryPreference={{diet}}&cuisine={{cuisine}}&maxPrepTime={{maxPrepTime}}&sortBy={{sortBy}}&page={{page}}&limit={{limit}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "search"
+                            ],
+                            "query": [
+                                {
+                                    "key": "ingredient",
+                                    "value": "{{ingredient}}"
+                                },
+                                {
+                                    "key": "dietaryPreference",
+                                    "value": "{{diet}}"
+                                },
+                                {
+                                    "key": "cuisine",
+                                    "value": "{{cuisine}}"
+                                },
+                                {
+                                    "key": "maxPrepTime",
+                                    "value": "{{maxPrepTime}}"
+                                },
+                                {
+                                    "key": "sortBy",
+                                    "value": "{{sortBy}}"
+                                },
+                                {
+                                    "key": "page",
+                                    "value": "{{page}}"
+                                },
+                                {
+                                    "key": "limit",
+                                    "value": "{{limit}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Search: By Cuisine",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/search/cuisine?type={{cuisine}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "search",
+                                "cuisine"
+                            ],
+                            "query": [
+                                {
+                                    "key": "type",
+                                    "value": "{{cuisine}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Search: By Title",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/search/title?name={{title}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "search",
+                                "title"
+                            ],
+                            "query": [
+                                {
+                                    "key": "name",
+                                    "value": "{{title}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Search: By Dietary Tag",
+                    "request": {
+                        "method": "GET",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/search/dietary?tag={{diet}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "search",
+                                "dietary"
+                            ],
+                            "query": [
+                                {
+                                    "key": "tag",
+                                    "value": "{{diet}}"
+                                }
+                            ]
+                        }
+                    },
+                    "response": []
+                },
+                {
+                    "name": "Delete Recipe",
+                    "request": {
+                        "method": "DELETE",
+                        "url": {
+                            "raw": "{{baseUrl}}/api/recipes/{{recipeId}}",
+                            "host": [
+                                "{{baseUrl}}"
+                            ],
+                            "path": [
+                                "api",
+                                "recipes",
+                                "{{recipeId}}"
+                            ]
+                        }
+                    },
+                    "response": []
+                }
+            ]
+        }
+    ]
+}
