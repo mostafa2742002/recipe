@@ -10,6 +10,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import com.example.recipe.config.JwtService;
+import com.example.recipe.dto.ApiResponse;
 import com.example.recipe.dto.AuthRequest;
 import com.example.recipe.model.Role;
 import com.example.recipe.model.User;
@@ -29,10 +30,12 @@ public class AuthService {
     private final JwtService jwtService;
     private final PasswordEncoder passwordEncoder;
 
-    public ResponseEntity<?> register(@RequestBody AuthRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> register(@RequestBody AuthRequest request) {
 
         if (userRepository.existsByEmail(request.getEmail())) {
-            return ResponseEntity.badRequest().body("Error: Email is already in use!");
+            ApiResponse<Map<String, String>> response = ApiResponse.failure("Email is already in use!",
+                    HttpStatus.BAD_REQUEST.value());
+            return ResponseEntity.badRequest().body(response);
         }
 
         User user = new User();
@@ -40,7 +43,6 @@ public class AuthService {
         user.setEmail(request.getEmail());
         user.setPassword(passwordEncoder.encode(request.getPassword()));
 
-        // Assign default role to the user
         Role userRole = roleRepository.findByName("ROLE_USER")
                 .orElseGet(() -> {
                     Role newRole = new Role();
@@ -51,10 +53,13 @@ public class AuthService {
         user.getRoles().add(userRole);
         userRepository.save(user);
         String jwtToken = jwtService.generateToken(user.getEmail());
-        return ResponseEntity.ok("User registered successfully. Token: " + jwtToken);
+        Map<String, String> payload = Map.of("token", jwtToken);
+        ApiResponse<Map<String, String>> response = ApiResponse.success("User registered successfully", payload,
+                HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
-    public ResponseEntity<?> login(@RequestBody AuthRequest request) {
+    public ResponseEntity<ApiResponse<Map<String, String>>> login(@RequestBody AuthRequest request) {
         try {
             Authentication authentication = authenticationManager.authenticate(
                     new org.springframework.security.authentication.UsernamePasswordAuthenticationToken(
@@ -62,12 +67,14 @@ public class AuthService {
                             request.getPassword()));
 
             String jwtToken = jwtService.generateToken(authentication.getName());
-            return ResponseEntity.ok("User logged in successfully. Token: " + jwtToken);
+            Map<String, String> payload = Map.of("token", jwtToken);
+            ApiResponse<Map<String, String>> response = ApiResponse.success("User logged in successfully", payload,
+                    HttpStatus.OK.value());
+            return ResponseEntity.ok(response);
         } catch (AuthenticationException ex) {
-            
-            return ResponseEntity
-                    .status(HttpStatus.UNAUTHORIZED)
-                    .body(Map.of("message", "Invalid email or password"));
+            ApiResponse<Map<String, String>> response = ApiResponse.failure("Invalid email or password",
+                    HttpStatus.UNAUTHORIZED.value());
+            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).body(response);
         }
     }
 

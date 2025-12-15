@@ -18,10 +18,10 @@ public class JwtService {
     @Value("${jwt.secret}")
     private String secret;
     
-    @Value("${jwt.expiration:86400000}") // 24 hours default
+    @Value("${jwt.expiration:86400000}") 
     private long expiration;
     
-    // Generate token for user
+  
     public String generateToken(String username) {
         Map<String, Object> claims = new HashMap<>();
         return createToken(claims, username);
@@ -42,12 +42,12 @@ public class JwtService {
         return Keys.hmacShaKeyFor(keyBytes);
     }
     
-    // Extract username from token
+ 
     public String extractUsername(String token) {
         return extractClaim(token, Claims::getSubject);
     }
     
-    // Extract expiration date
+    
     public Date extractExpiration(String token) {
         return extractClaim(token, Claims::getExpiration);
     }
@@ -65,7 +65,7 @@ public class JwtService {
                 .getPayload();
     }
     
-    // Validate token
+    
     public Boolean validateToken(String token, UserDetails userDetails) {
         final String username = extractUsername(token);
         return (username.equals(userDetails.getUsername()) && !isTokenExpired(token));

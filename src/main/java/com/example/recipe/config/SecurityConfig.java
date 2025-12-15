@@ -31,10 +31,10 @@ public class SecurityConfig {
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
-                .csrf(csrf -> csrf.disable()) // Disable CSRF for stateless JWT APIs[citation:1]
+                .csrf(csrf -> csrf.disable()) 
 
                 .authorizeHttpRequests(auth -> auth
-                        // Public endpoints
+                       
                         .requestMatchers(
                                 "/api/auth/**",
                                 "/api/public/**",
@@ -43,20 +43,20 @@ public class SecurityConfig {
                                 "/swagger-ui.html")
                         .permitAll()
 
-                        // Role-based endpoints
+                    
                         .requestMatchers("/api/user/**").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/api/admin/**").hasRole("ADMIN")
 
-                        // All other endpoints require authentication
+                      
                         .anyRequest().authenticated())
 
-                // Stateless session management (required for JWT)[citation:1]
+                
                 .sessionManagement(sess -> sess.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
 
-                // Configure authentication provider
+            
                 .authenticationProvider(authenticationProvider())
 
-                // Add JWT filter before default authentication filter
+         
                 .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
@@ -71,7 +71,7 @@ public class SecurityConfig {
 
     @Bean
     public PasswordEncoder passwordEncoder() {
-        return new BCryptPasswordEncoder(); // Strong password hashing[citation:4]
+        return new BCryptPasswordEncoder(); 
     }
 
     @Bean

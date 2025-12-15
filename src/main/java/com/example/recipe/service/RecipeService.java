@@ -154,8 +154,6 @@ public class RecipeService {
         return new SearchResponse(recipes, totalCount, searchRequest.getPage(), totalPages);
     }
 
-    // ===== ORIGINAL METHODS =====
-
     public List<Recipe> getRecipesByAuthor(String userId) {
         return recipeRepository.findByAuthorId(userId);
     }

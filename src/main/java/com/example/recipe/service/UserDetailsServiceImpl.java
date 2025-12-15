@@ -33,7 +33,7 @@ public class UserDetailsServiceImpl implements UserDetailsService {
                 user.getUsername(),
                 user.getPassword(),
                 Boolean.TRUE.equals(user.getEnabled()),
-                true, true, true, // account non-expired, non-locked, credentials non-expired
+                true, true, true, 
                 getAuthorities(user)
                 );
     }

@@ -20,6 +20,7 @@ import jakarta.validation.Valid;
 import com.example.recipe.model.Recipe;
 import com.example.recipe.model.User;
 import com.example.recipe.repository.UserRepository;
+import com.example.recipe.dto.ApiResponse;
 import com.example.recipe.dto.SearchRequest;
 import com.example.recipe.dto.SearchResponse;
 import com.example.recipe.service.RecipeService;
@@ -49,10 +50,11 @@ public class RecipeController {
      * POST /api/recipes
      */
     @PostMapping
-    public ResponseEntity<?> createRecipe(@RequestBody Recipe recipe) {
+    public ResponseEntity<ApiResponse<Recipe>> createRecipe(@RequestBody Recipe recipe) {
         String userId = getCurrentUserId();
         Recipe createdRecipe = recipeService.createRecipe(recipe, userId);
-        return ResponseEntity.status(HttpStatus.CREATED).body(createdRecipe);
+        ApiResponse<Recipe> response = ApiResponse.success("Recipe created", createdRecipe, HttpStatus.CREATED.value());
+        return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
 
     /**
@@ -60,9 +62,10 @@ public class RecipeController {
      * GET /api/recipes
      */
     @GetMapping
-    public ResponseEntity<?> getAllRecipes() {
+    public ResponseEntity<ApiResponse<List<Recipe>>> getAllRecipes() {
         List<Recipe> recipes = recipeService.getAllRecipes();
-        return ResponseEntity.ok(recipes);
+        ApiResponse<List<Recipe>> response = ApiResponse.success("Recipes fetched", recipes, HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -70,10 +73,11 @@ public class RecipeController {
      * GET /api/recipes/{id}
      */
     @GetMapping("/{id}")
-    public ResponseEntity<?> getRecipeById(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Recipe>> getRecipeById(@PathVariable String id) {
         return recipeService.getRecipeById(id)
-                .map(ResponseEntity::ok)
-                .orElse(ResponseEntity.notFound().build());
+                .map(recipe -> ResponseEntity.ok(ApiResponse.success("Recipe fetched", recipe, HttpStatus.OK.value())))
+                .orElse(ResponseEntity.status(HttpStatus.NOT_FOUND)
+                        .body(ApiResponse.failure("Recipe not found", HttpStatus.NOT_FOUND.value())));
     }
 
     /**
@@ -81,10 +85,11 @@ public class RecipeController {
      * GET /api/recipes/user/my-recipes
      */
     @GetMapping("/user/my-recipes")
-    public ResponseEntity<?> getMyRecipes() {
+    public ResponseEntity<ApiResponse<List<Recipe>>> getMyRecipes() {
         String userId = getCurrentUserId();
         List<Recipe> recipes = recipeService.getRecipesByAuthor(userId);
-        return ResponseEntity.ok(recipes);
+        ApiResponse<List<Recipe>> response = ApiResponse.success("My recipes fetched", recipes, HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -92,9 +97,11 @@ public class RecipeController {
      * GET /api/recipes/author/{userId}
      */
     @GetMapping("/author/{userId}")
-    public ResponseEntity<?> getRecipesByAuthor(@PathVariable String userId) {
+    public ResponseEntity<ApiResponse<List<Recipe>>> getRecipesByAuthor(@PathVariable String userId) {
         List<Recipe> recipes = recipeService.getRecipesByAuthor(userId);
-        return ResponseEntity.ok(recipes);
+        ApiResponse<List<Recipe>> response = ApiResponse.success("Author recipes fetched", recipes,
+                HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -102,10 +109,11 @@ public class RecipeController {
      * PUT /api/recipes/{id}
      */
     @PutMapping("/{id}")
-    public ResponseEntity<?> updateRecipe(@PathVariable String id, @RequestBody Recipe updates) {
+    public ResponseEntity<ApiResponse<Recipe>> updateRecipe(@PathVariable String id, @RequestBody Recipe updates) {
         String userId = getCurrentUserId();
         Recipe updatedRecipe = recipeService.updateRecipe(id, updates, userId);
-        return ResponseEntity.ok(updatedRecipe);
+        ApiResponse<Recipe> response = ApiResponse.success("Recipe updated", updatedRecipe, HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -113,10 +121,11 @@ public class RecipeController {
      * DELETE /api/recipes/{id}
      */
     @DeleteMapping("/{id}")
-    public ResponseEntity<?> deleteRecipe(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> deleteRecipe(@PathVariable String id) {
         String userId = getCurrentUserId();
         recipeService.deleteRecipe(id, userId);
-        return ResponseEntity.ok("Recipe deleted successfully");
+        ApiResponse<Void> response = ApiResponse.success("Recipe deleted successfully", null, HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -124,10 +133,11 @@ public class RecipeController {
      * POST /api/recipes/{id}/save
      */
     @PostMapping("/{id}/save")
-    public ResponseEntity<?> saveRecipe(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> saveRecipe(@PathVariable String id) {
         String userId = getCurrentUserId();
         recipeService.addRecipeToUserSaved(id, userId);
-        return ResponseEntity.ok("Recipe saved successfully");
+        ApiResponse<Void> response = ApiResponse.success("Recipe saved successfully", null, HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -135,10 +145,11 @@ public class RecipeController {
      * DELETE /api/recipes/{id}/unsave
      */
     @DeleteMapping("/{id}/unsave")
-    public ResponseEntity<?> unsaveRecipe(@PathVariable String id) {
+    public ResponseEntity<ApiResponse<Void>> unsaveRecipe(@PathVariable String id) {
         String userId = getCurrentUserId();
         recipeService.removeRecipeFromUserSaved(id, userId);
-        return ResponseEntity.ok("Recipe removed from saved");
+        ApiResponse<Void> response = ApiResponse.success("Recipe removed from saved", null, HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -146,10 +157,12 @@ public class RecipeController {
      * GET /api/recipes/user/saved
      */
     @GetMapping("/user/saved")
-    public ResponseEntity<?> getMySavedRecipes() {
+    public ResponseEntity<ApiResponse<List<Recipe>>> getMySavedRecipes() {
         String userId = getCurrentUserId();
         List<Recipe> recipes = recipeService.getUserSavedRecipes(userId);
-        return ResponseEntity.ok(recipes);
+        ApiResponse<List<Recipe>> response = ApiResponse.success("Saved recipes fetched", recipes,
+                HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -157,9 +170,11 @@ public class RecipeController {
      * GET /api/recipes/search/cuisine?type=Italian
      */
     @GetMapping("/search/cuisine")
-    public ResponseEntity<?> searchByCuisine(@RequestParam String type) {
+    public ResponseEntity<ApiResponse<List<Recipe>>> searchByCuisine(@RequestParam String type) {
         List<Recipe> recipes = recipeService.getRecipesByCuisine(type);
-        return ResponseEntity.ok(recipes);
+        ApiResponse<List<Recipe>> response = ApiResponse.success("Recipes by cuisine fetched", recipes,
+                HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -167,9 +182,11 @@ public class RecipeController {
      * GET /api/recipes/search/title?name=pasta
      */
     @GetMapping("/search/title")
-    public ResponseEntity<?> searchByTitle(@RequestParam String name) {
+    public ResponseEntity<ApiResponse<List<Recipe>>> searchByTitle(@RequestParam String name) {
         List<Recipe> recipes = recipeService.searchRecipesByTitle(name);
-        return ResponseEntity.ok(recipes);
+        ApiResponse<List<Recipe>> response = ApiResponse.success("Recipes by title fetched", recipes,
+                HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -177,9 +194,11 @@ public class RecipeController {
      * GET /api/recipes/search/dietary?tag=vegan
      */
     @GetMapping("/search/dietary")
-    public ResponseEntity<?> searchByDietaryTag(@RequestParam String tag) {
+    public ResponseEntity<ApiResponse<List<Recipe>>> searchByDietaryTag(@RequestParam String tag) {
         List<Recipe> recipes = recipeService.getRecipesByDietaryTag(tag);
-        return ResponseEntity.ok(recipes);
+        ApiResponse<List<Recipe>> response = ApiResponse.success("Recipes by dietary tag fetched", recipes,
+                HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 
     /**
@@ -202,8 +221,9 @@ public class RecipeController {
      * @return SearchResponse with paginated results and metadata
      */
     @GetMapping("/search")
-    public ResponseEntity<?> search(@Valid SearchRequest searchRequest) {
+    public ResponseEntity<ApiResponse<SearchResponse>> search(@Valid SearchRequest searchRequest) {
         SearchResponse results = recipeService.advancedSearch(searchRequest);
-        return ResponseEntity.ok(results);
+        ApiResponse<SearchResponse> response = ApiResponse.success("Search results", results, HttpStatus.OK.value());
+        return ResponseEntity.ok(response);
     }
 }

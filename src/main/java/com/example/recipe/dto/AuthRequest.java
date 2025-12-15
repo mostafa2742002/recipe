@@ -8,7 +8,7 @@ import lombok.Data;
 @Data
 public class AuthRequest {
     @Size(min = 3, max = 50, message = "Username must be between 3 and 50 characters")
-    private String username; // optional for login, required for registration workflow
+    private String username; 
 
     @NotBlank(message = "Email is required")
     @Email(message = "Email must be valid")
